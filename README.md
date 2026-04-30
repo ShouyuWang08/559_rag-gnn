@@ -58,7 +58,7 @@ rag-gnn-hetionet/
 │   ├── hetero_gnn.py             # SAGEConv + to_hetero heterogeneous GNN
 │   └── link_predictor.py         # Dot-product / MLP scorer
 ├── retrieval/
-│   ├── metapath.py               # 4 confirmed-working Compound→Disease meta-paths
+│   ├── metapath.py               # 9 candidate meta-path templates (4 core + 4 co-regulation + 1 pathway-context)
 │   ├── subgraph_extractor.py     # Path enumeration + GNN embedding scoring
 │   └── verbalizer.py             # Path → natural language
 ├── llm/
@@ -85,7 +85,7 @@ rag-gnn-hetionet/
 | Node features | Learnable `nn.Embedding` | Hetionet has no node attributes; embeddings are learned from scratch |
 | Main task | `Compound-treats-Disease` link prediction | 755 positive samples, classic drug-repurposing benchmark |
 | Evaluation | AUROC / AUPRC / Hits@1/3/10 | All comparable to Rephetio baselines |
-| Subgraph retrieval | 4 meta-path enumeration + GNN cosine similarity scoring | Avoids path explosion, retains biological semantics |
+| Subgraph retrieval | 9 candidate meta-path templates + GNN cosine similarity scoring | Avoids path explosion, retains biological semantics |
 | LLM | Grok 4 Fast Reasoning (xAI API) | Sufficient biomedical reasoning capability, low cost |
 | Prompt structure | System + JSON schema output | Parseable; three fields: `prediction / confidence / rationale` |
 | Faithfulness evaluation | LLM-as-judge (second call) | Checks whether the rationale hallucinates entities not in the retrieved paths |
@@ -173,6 +173,6 @@ Net retrieval benefit: 61 : 13 ≈ 4.7×.
 ## Known Limitations / Report Limitations Section
 
 - **Closed-loop RL not implemented**: The original proposal's LLM-as-judge + RL retrieval strategy was not implemented (engineering scope exceeded budget). The current "static top-K + LLM faithfulness check" serves as groundwork for future work.
-- **Manually enumerated meta-paths**: 8 predefined templates; no automatic meta-path learning.
+- **Manually enumerated meta-paths**: 9 candidate templates (4 core + 4 co-regulation + 1 pathway-context proxy); no automatic meta-path learning.
 - **Small LLM evaluation sample**: Each pipeline run covers ~60 pairs (API cost); high variance.
 - **No literature node features**: The original Hays paper used BioBERT-encoded PubMed abstracts as node features; this project does not include that layer (future work).

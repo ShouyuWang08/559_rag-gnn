@@ -22,12 +22,16 @@ class Metapath:
         return tuple(out)
 
 
-# Four meta-paths whose edge types are confirmed present in Hetionet v1.0.
-# Co-regulation paths (CuGuD / CdGdD / CuGdD / CdGuD) would require reverse
-# traversal of Disease-upregulates/downregulates-Gene edges, which are stored
-# as forward-only in the Hetionet JSON; they are therefore omitted here and
-# left as future work (see §7).  CbGpPpG is also omitted because the Pathway
-# hub does not connect back to Disease in the standard Hetionet metagraph.
+# Nine candidate meta-path templates for Hetionet v1.0.
+# Disease-upregulates/downregulates-Gene edges are stored with direction="both"
+# in the Hetionet JSON, so load_hetionet automatically adds the reverse
+# ("Gene", "upregulates/downregulates", "Disease") edge types; the four
+# co-regulation paths therefore traverse real edges.
+# CbGpPpG-free is a 3-hop pathway-context path (Compound-binds-Gene-
+# participates-Pathway-participates-Gene) that surfaces mechanistic context
+# via shared pathway membership; its terminal node type is Gene rather than
+# Disease, so it functions as contextual evidence rather than a direct
+# Compound→Disease path.
 METAPATHS: list[Metapath] = [
     Metapath("CpD", (
         ("Compound", "palliates", "Disease"),
@@ -44,5 +48,26 @@ METAPATHS: list[Metapath] = [
         ("Compound", "binds", "Gene"),
         ("Gene", "interacts", "Gene"),
         ("Gene", "associates", "Disease"),
+    )),
+    Metapath("CuGuD", (
+        ("Compound", "upregulates", "Gene"),
+        ("Gene", "upregulates", "Disease"),
+    )),
+    Metapath("CdGdD", (
+        ("Compound", "downregulates", "Gene"),
+        ("Gene", "downregulates", "Disease"),
+    )),
+    Metapath("CdGuD", (
+        ("Compound", "downregulates", "Gene"),
+        ("Gene", "upregulates", "Disease"),
+    )),
+    Metapath("CuGdD", (
+        ("Compound", "upregulates", "Gene"),
+        ("Gene", "downregulates", "Disease"),
+    )),
+    Metapath("CbGpPpG-free", (
+        ("Compound", "binds", "Gene"),
+        ("Gene", "participates", "Pathway"),
+        ("Pathway", "participates", "Gene"),
     )),
 ]

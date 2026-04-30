@@ -458,7 +458,7 @@ Prompt structure (see [llm/prompts.py](llm/prompts.py)):
 
 | File | Role |
 |---|---|
-| [retrieval/metapath.py](retrieval/metapath.py) | 9 predefined meta-paths (CpD / CbGaD / CuGuD / CdGdD / CbGiGaD, etc.) |
+| [retrieval/metapath.py](retrieval/metapath.py) | 9 candidate meta-path templates (CpD / CbGaD / CrCtD / CbGiGaD / CuGuD / CdGdD / CdGuD / CuGdD / CbGpPpG-free) |
 | [retrieval/subgraph_extractor.py](retrieval/subgraph_extractor.py) | `build_adjacency`: converts edge_index to dict for fast neighbour lookup. `extract_paths`: enumerates all matching paths for a given (c, d) pair, scores them by GNN cosine similarity, returns top-K. |
 | [retrieval/verbalizer.py](retrieval/verbalizer.py) | Natural-language templates for each relation type ("X binds Y", "X is associated with Y"), assembled into full path text. |
 
@@ -711,7 +711,7 @@ If budget is tight:
 - §3.1 Problem formulation
 - §3.2 Hetero GNN encoder (SAGEConv + to_hetero, with formula)
 - §3.3 Link predictor (dot product)
-- §3.4 Meta-path subgraph retrieval (list 9 meta-paths, scoring formula)
+- §3.4 Meta-path subgraph retrieval (list 9 candidate templates, scoring formula)
 - §3.5 Path verbalisation (templates)
 - §3.6 LLM reasoning (prompt structure + JSON schema)
 - §3.7 Faithfulness judge

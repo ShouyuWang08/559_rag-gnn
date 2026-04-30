@@ -147,7 +147,7 @@ Scores are given by inner product $\mathrm{score}(c,d) = \mathbf{h}_c^{\top}\mat
 
 \subsection{Meta-path subgraph retrieval}
 \label{sec:method:retrieval}
-Following \citet{himmelstein2017}, we define four biologically-motivated meta-paths (Table~\ref{tab:metapaths}). For a query $(c,d)$, we enumerate every instantiation of each template using precomputed forward adjacency dictionaries, giving a candidate set $\mathcal{P}(c,d)$. Each path $p=(v_0,v_1,\ldots,v_L)$ with $v_0{=}c,\,v_L{=}d$ is scored by the mean cosine similarity between consecutive node embeddings:
+Following \citet{himmelstein2017}, we define nine candidate meta-path templates (Table~\ref{tab:metapaths}). For a query $(c,d)$, we enumerate every instantiation of each template using precomputed forward adjacency dictionaries, giving a candidate set $\mathcal{P}(c,d)$. Each path $p=(v_0,v_1,\ldots,v_L)$ with $v_0{=}c,\,v_L{=}d$ is scored by the mean cosine similarity between consecutive node embeddings:
 \begin{equation}
 s(p) = \frac{1}{L}\sum_{i=0}^{L-1} \cos\!\bigl(\mathbf{h}_{v_i},\,\mathbf{h}_{v_{i+1}}\bigr).
 \label{eq:pathscore}
@@ -157,16 +157,21 @@ The top-$K$ scoring paths are forwarded to the verbaliser. Eq.~\eqref{eq:pathsco
 \begin{table}[t]
 \centering
 \small
-\caption{Four meta-path templates used for subgraph retrieval. Abbreviations follow Hetionet convention (\texttt{b}=binds, \texttt{i}=interacts, \texttt{a}=associates, \texttt{r}=resembles, \texttt{p}=palliates, \texttt{t}=treats). Co-regulation paths (CuGuD, CdGdD, CuGdD, CdGuD) and the pathway-proxy path (CbGpPpG) are omitted: Hetionet stores Disease-expression-Gene edges as forward-only, so no reverse traversal is available, and CbGpPpG terminates at Gene rather than Disease.}
+\caption{Nine candidate meta-path templates. Abbreviations follow Hetionet convention (\texttt{b}=binds, \texttt{i}=interacts, \texttt{a}=associates, \texttt{r}=resembles, \texttt{p}=palliates/participates, \texttt{t}=treats, \texttt{u}=upregulates, \texttt{d}=downregulates). Co-regulation paths are enabled by Hetionet storing Disease-expression-Gene edges with \texttt{direction=both}, making Gene$\to$Disease reverse traversal available. CbGpPpG-free terminates at a Gene rather than a Disease node and supplies pathway-context evidence.}
 \label{tab:metapaths}
 \begin{tabular}{@{}lll@{}}
 \toprule
 ID & Template & Biological interpretation \\
 \midrule
-CpD      & Compound $\to$ Disease (palliates)                               & symptomatic precedent \\
-CbGaD    & Compound-binds-Gene-associates-Disease                           & target-driven \\
-CrCtD    & Compound-resembles-Compound-treats-Disease                       & analogue rescue \\
-CbGiGaD  & Compound-binds-Gene-interacts-Gene-associates-Disease            & 2-hop mechanistic \\
+CpD           & Compound $\to$ Disease (palliates)                               & symptomatic precedent \\
+CbGaD         & Compound-binds-Gene-associates-Disease                           & target-driven \\
+CrCtD         & Compound-resembles-Compound-treats-Disease                       & analogue rescue \\
+CbGiGaD       & Compound-binds-Gene-interacts-Gene-associates-Disease            & 2-hop mechanistic \\
+CuGuD         & Compound-upregulates-Gene-upregulates-Disease                    & up--up co-regulation \\
+CdGdD         & Compound-downregulates-Gene-downregulates-Disease                & down--down co-regulation \\
+CdGuD         & Compound-downregulates-Gene-upregulates-Disease                  & down--up co-regulation \\
+CuGdD         & Compound-upregulates-Gene-downregulates-Disease                  & up--down co-regulation \\
+CbGpPpG-free  & Compound-binds-Gene-participates-Pathway-participates-Gene       & pathway-context proxy \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -328,7 +333,7 @@ To illustrate the interpretive payoff of our pipeline, we ran the DDR1-centric c
 The present study has four main limitations, each of which points to a specific extension.
 
 \begin{enumerate}[label=(\roman*)]
-    \item \textbf{Hand-designed meta-paths.} Our four templates are a biologist's shortlist rather than an exhaustive search of Hetionet's meta-path space. Five additional candidates (the four co-regulation paths CuGuD/CdGdD/CuGdD/CdGuD and the pathway-proxy CbGpPpG) were excluded because Hetionet stores Disease-expression-Gene edges as forward-only, making reverse traversal unavailable, and CbGpPpG terminates at Gene rather than Disease. Automatic meta-path mining along the lines of PathCon~\citep{wang2021pathcon} would reduce this bias.
+    \item \textbf{Hand-designed meta-paths.} Our nine templates are a biologist's shortlist rather than an exhaustive search of Hetionet's meta-path space. Automatic meta-path mining along the lines of PathCon~\citep{wang2021pathcon} would reduce this bias and may surface additional templates beyond the co-regulation and pathway-context paths we include.
     \item \textbf{Open-loop retrieval.} Eq.~\eqref{eq:pathscore} never receives a downstream signal. Our original proposal's closed-loop scheme, using the LLM judge as an RL reward for retriever parameters, remains the natural next step---especially given that the \S\ref{sec:exp:faith} faithfulness signal is precisely the reward such a system would use. The static saturation curve of Figure~\ref{fig:ablation} suggests a \emph{score cut-off} retriever may match or exceed a full RL treatment at a fraction of the training cost.
     \item \textbf{No text-enriched node features.} \citet{hays2026raggnn} encode PubMed abstracts with BioBERT~\citep{lee2020biobert} to obtain node features; our embeddings are learnt from scratch. Injecting BioBERT features would couple the LLM and GNN knowledge more tightly and likely improve both \gnno and \ours.
     \item \textbf{Scale.} PrimeKG~\citep{chandak2022primekg}, $2.7\times$ larger than Hetionet, would stress-test the saturation phenomenon and the judge's scalability. We view this as the clearest path to a top-venue submission.
