@@ -22,16 +22,12 @@ class Metapath:
         return tuple(out)
 
 
-# Nine candidate meta-path templates for Hetionet v1.0.
+# Eight Compound→Disease meta-path templates for Hetionet v1.0.
+# All eight paths satisfy v_0=Compound, v_L=Disease.
 # Disease-upregulates/downregulates-Gene edges are stored with direction="both"
 # in the Hetionet JSON, so load_hetionet automatically adds the reverse
 # ("Gene", "upregulates/downregulates", "Disease") edge types; the four
-# co-regulation paths therefore traverse real edges.
-# CbGpPpG-free is a 3-hop pathway-context path (Compound-binds-Gene-
-# participates-Pathway-participates-Gene) that surfaces mechanistic context
-# via shared pathway membership; its terminal node type is Gene rather than
-# Disease, so it functions as contextual evidence rather than a direct
-# Compound→Disease path.
+# co-regulation paths therefore traverse real, bidirectional edges.
 METAPATHS: list[Metapath] = [
     Metapath("CpD", (
         ("Compound", "palliates", "Disease"),
@@ -64,10 +60,5 @@ METAPATHS: list[Metapath] = [
     Metapath("CuGdD", (
         ("Compound", "upregulates", "Gene"),
         ("Gene", "downregulates", "Disease"),
-    )),
-    Metapath("CbGpPpG-free", (
-        ("Compound", "binds", "Gene"),
-        ("Gene", "participates", "Pathway"),
-        ("Pathway", "participates", "Gene"),
     )),
 ]

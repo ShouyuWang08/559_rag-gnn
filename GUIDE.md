@@ -287,7 +287,7 @@ h_v^(l+1) = σ(W · CONCAT(h_v^(l), MEAN({h_u^(l) : u ∈ N(v)})))
 **Meta-path**:
 > A fixed template that switches between node types, defining a "semantic walk."
 
-Examples (we define 9 in `retrieval/metapath.py`):
+Examples (we define 8 in `retrieval/metapath.py`):
 - `CbGaD`: Compound-binds-Gene-associates-Disease (gene bound by drug is associated with the disease)
 - `CrCtD`: Compound-resembles-Compound-treats-Disease (a structurally similar drug treats this disease)
 - `CbGiGaD`: Compound-binds-Gene-interacts-Gene-associates-Disease (an interacting partner of the drug target is associated with the disease)
@@ -458,7 +458,7 @@ Prompt structure (see [llm/prompts.py](llm/prompts.py)):
 
 | File | Role |
 |---|---|
-| [retrieval/metapath.py](retrieval/metapath.py) | 9 candidate meta-path templates (CpD / CbGaD / CrCtD / CbGiGaD / CuGuD / CdGdD / CdGuD / CuGdD / CbGpPpG-free) |
+| [retrieval/metapath.py](retrieval/metapath.py) | 8 Compound→Disease meta-path templates (CpD / CbGaD / CrCtD / CbGiGaD / CuGuD / CdGdD / CdGuD / CuGdD) |
 | [retrieval/subgraph_extractor.py](retrieval/subgraph_extractor.py) | `build_adjacency`: converts edge_index to dict for fast neighbour lookup. `extract_paths`: enumerates all matching paths for a given (c, d) pair, scores them by GNN cosine similarity, returns top-K. |
 | [retrieval/verbalizer.py](retrieval/verbalizer.py) | Natural-language templates for each relation type ("X binds Y", "X is associated with Y"), assembled into full path text. |
 
@@ -711,7 +711,7 @@ If budget is tight:
 - §3.1 Problem formulation
 - §3.2 Hetero GNN encoder (SAGEConv + to_hetero, with formula)
 - §3.3 Link predictor (dot product)
-- §3.4 Meta-path subgraph retrieval (list 9 candidate templates, scoring formula)
+- §3.4 Meta-path subgraph retrieval (list 8 Compound→Disease templates, scoring formula)
 - §3.5 Path verbalisation (templates)
 - §3.6 LLM reasoning (prompt structure + JSON schema)
 - §3.7 Faithfulness judge
