@@ -11,7 +11,6 @@ Pipeline: `Compound ←→ Disease` link prediction. The GNN mines the top-K met
 ## Quick Start
 
 ```bash
-cd "c:/Users/10249/OneDrive/Desktop/RAG/rag-gnn-hetionet"
 pip install -r requirements.txt
 
 # 1. Download data + print statistics
@@ -59,7 +58,7 @@ rag-gnn-hetionet/
 │   ├── hetero_gnn.py             # SAGEConv + to_hetero heterogeneous GNN
 │   └── link_predictor.py         # Dot-product / MLP scorer
 ├── retrieval/
-│   ├── metapath.py               # 8 predefined Compound→Disease meta-paths
+│   ├── metapath.py               # 4 confirmed-working Compound→Disease meta-paths
 │   ├── subgraph_extractor.py     # Path enumeration + GNN embedding scoring
 │   └── verbalizer.py             # Path → natural language
 ├── llm/
@@ -86,7 +85,7 @@ rag-gnn-hetionet/
 | Node features | Learnable `nn.Embedding` | Hetionet has no node attributes; embeddings are learned from scratch |
 | Main task | `Compound-treats-Disease` link prediction | 755 positive samples, classic drug-repurposing benchmark |
 | Evaluation | AUROC / AUPRC / Hits@1/3/10 | All comparable to Rephetio baselines |
-| Subgraph retrieval | 8 meta-path enumeration + GNN cosine similarity scoring | Avoids path explosion, retains biological semantics |
+| Subgraph retrieval | 4 meta-path enumeration + GNN cosine similarity scoring | Avoids path explosion, retains biological semantics |
 | LLM | Grok 4 Fast Reasoning (xAI API) | Sufficient biomedical reasoning capability, low cost |
 | Prompt structure | System + JSON schema output | Parseable; three fields: `prediction / confidence / rationale` |
 | Faithfulness evaluation | LLM-as-judge (second call) | Checks whether the rationale hallucinates entities not in the retrieved paths |

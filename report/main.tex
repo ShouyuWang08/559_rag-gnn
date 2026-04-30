@@ -369,7 +369,7 @@ All experiments use fixed random seeds (GNN split seed $42$; training seed $42$;
 % ====================================================================
 \section{Conclusion}
 \label{sec:conclusion}
-We have presented a rigorous, reproducible GraphRAG pipeline for Hetionet-based drug repurposing. A heterogeneous GNN supplies the retrieval prior for meta-path subgraph selection; a reasoning LLM supplies the human-readable rationale; a second LLM call supplies the faithfulness audit. On $150$ paired test examples the pipeline is $+15$ accuracy points above the strongest non-RAG baseline with McNemar $p{<}0.01$. A top-$K$ ablation uncovers a sharp saturation law that reframes closed-loop retrieval as a problem of \emph{score calibration} rather than capacity; a faithfulness audit isolates the open problem for the next phase of this work.
+We have presented a rigorous, reproducible GraphRAG pipeline for Hetionet-based drug repurposing. A heterogeneous GNN supplies the retrieval prior for meta-path subgraph selection; a reasoning LLM supplies the human-readable rationale; a second LLM call supplies the faithfulness audit. On $150$ paired test examples the pipeline is $+15$ accuracy points above \gnno (McNemar $p{<}0.01$) and $+8.6$ points above the strongest non-RAG baseline, calibrated DistMult (McNemar $p{<}0.05$). A top-$K$ ablation uncovers a sharp saturation law that reframes closed-loop retrieval as a problem of \emph{score calibration} rather than capacity; a faithfulness audit isolates the open problem for the next phase of this work.
 
 \paragraph{Code and data.}
 All code, model-checkpoint recipes, per-case predictions and bootstrap scripts are at \url{https://github.com/ShouyuWang08/559_rag-gnn}.
