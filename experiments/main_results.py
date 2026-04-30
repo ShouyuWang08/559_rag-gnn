@@ -99,6 +99,7 @@ def main():
     p.add_argument("--out", type=str, default="runs/main_results.jsonl")
     p.add_argument("--model", type=str, default="grok-4-fast-reasoning")
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--neg-seed", type=int, default=42)
     p.add_argument("--judge", action="store_true")
     args = p.parse_args()
 
@@ -116,7 +117,7 @@ def main():
 
     n_pos = min(args.n_pos, split.test_pos.size(1))
     pos_pairs = [(int(split.test_pos[0, i]), int(split.test_pos[1, i])) for i in range(n_pos)]
-    neg_ei = sample_negatives(split.num_compounds, split.num_diseases, args.n_neg, positive_set=all_pos)
+    neg_ei = sample_negatives(split.num_compounds, split.num_diseases, args.n_neg, positive_set=all_pos, seed=args.neg_seed)
     neg_pairs = [(int(neg_ei[0, i]), int(neg_ei[1, i])) for i in range(neg_ei.size(1))]
     cases = [(c, d, 1) for c, d in pos_pairs] + [(c, d, 0) for c, d in neg_pairs]
 

@@ -84,7 +84,7 @@ The discovery of a single new small-molecule drug takes on average ten years and
 
 Despite their dominance on structural benchmarks, graph neural networks exhibit a persistent \emph{structure-function gap}~\citep{zitnik2018decagon}: two proteins that occupy similar neighbourhoods in a biological graph may perform entirely unrelated cellular roles, while mechanistically related entities can sit several hops apart. Static knowledge-graph embeddings such as DistMult~\citep{yang2015distmult} and ComplEx~\citep{trouillon2016complex} compress the same topology into lower-dimensional vectors but still share this limitation; they offer no human-readable explanation for their predictions.
 
-Recent advances in retrieval-augmented generation (RAG)~\citep{lewis2020rag} and graph-aware LLM reasoning~\citep{mavromatis2024gnnrag,sun2024tog} suggest a different path: rather than train the GNN to absorb semantic knowledge, let the GNN \emph{retrieve} candidate subgraphs and hand the interpretation to a modern large language model. \citet{hays2026raggnn} quantified this complementarity, reporting that topology contributes roughly $77.3\%$ of predictive information while retrieved text adds $8.6\%$ of non-redundant signal---small in magnitude but critical for interpretation. Their architecture, however, remains open-loop: retrieval is governed by a fixed semantic-similarity rule and is never adapted to the downstream task.
+Recent advances in retrieval-augmented generation (RAG)~\citep{lewis2020rag} and graph-aware LLM reasoning~\citep{mavromatis2024gnnrag,sun2024tog} suggest a different path: rather than train the GNN to absorb semantic knowledge, let the GNN \emph{retrieve} candidate subgraphs and hand the interpretation to a modern large language model. \citet{hays2026raggnn} quantified this complementarity, estimating that topology dominates predictive information while retrieved text adds a small but critical increment of non-redundant signal for interpretation. Their architecture, however, remains open-loop: retrieval is governed by a fixed semantic-similarity rule and is never adapted to the downstream task.
 
 Our original proposal pursued a closed-loop variant in which a LLM judge would supply a reinforcement-learning reward to the retriever. The present paper retreats from that ambition in order to deliver a rigorous empirical baseline that the closed-loop idea must eventually beat. We implement GraphRAG end-to-end on Hetionet, compare it to three strong baselines under paired significance testing, and quantify both where retrieval helps and where the LLM's interpretive layer introduces new failure modes.
 
@@ -149,7 +149,7 @@ Scores are given by inner product $\mathrm{score}(c,d) = \mathbf{h}_c^{\top}\mat
 
 \subsection{Meta-path subgraph retrieval}
 \label{sec:method:retrieval}
-Following \citet{himmelstein2017}, we define nine biologically-motivated meta-paths (Table~\ref{tab:metapaths}). For a query $(c,d)$, we enumerate every instantiation of each template using precomputed forward adjacency dictionaries, giving a candidate set $\mathcal{P}(c,d)$. Each path $p=(v_0,v_1,\ldots,v_L)$ with $v_0{=}c,\,v_L{=}d$ is scored by the mean cosine similarity between consecutive node embeddings:
+Following \citet{himmelstein2017}, we define four biologically-motivated meta-paths (Table~\ref{tab:metapaths}). For a query $(c,d)$, we enumerate every instantiation of each template using precomputed forward adjacency dictionaries, giving a candidate set $\mathcal{P}(c,d)$. Each path $p=(v_0,v_1,\ldots,v_L)$ with $v_0{=}c,\,v_L{=}d$ is scored by the mean cosine similarity between consecutive node embeddings:
 \begin{equation}
 s(p) = \frac{1}{L}\sum_{i=0}^{L-1} \cos\!\bigl(\mathbf{h}_{v_i},\,\mathbf{h}_{v_{i+1}}\bigr).
 \label{eq:pathscore}
@@ -185,7 +185,7 @@ Algorithm~\ref{alg:retrieve} gives the full procedure. The forward-adjacency map
 \begin{table}[t]
 \centering
 \small
-\caption{Nine meta-path templates used for subgraph retrieval. Abbreviations follow Hetionet convention (e.g.\ \texttt{b}=binds, \texttt{i}=interacts, \texttt{a}=associates, \texttt{u}=upregulates, \texttt{d}=downregulates, \texttt{r}=resembles, \texttt{p}=palliates, \texttt{t}=treats).}
+\caption{Four meta-path templates used for subgraph retrieval. Abbreviations follow Hetionet convention (\texttt{b}=binds, \texttt{i}=interacts, \texttt{a}=associates, \texttt{r}=resembles, \texttt{p}=palliates, \texttt{t}=treats). Co-regulation paths (CuGuD, CdGdD, CuGdD, CdGuD) and the pathway-proxy path (CbGpPpG) are omitted: Hetionet stores Disease-expression-Gene edges as forward-only, so no reverse traversal is available, and CbGpPpG terminates at Gene rather than Disease.}
 \label{tab:metapaths}
 \begin{tabular}{@{}lll@{}}
 \toprule
@@ -193,13 +193,8 @@ ID & Template & Biological interpretation \\
 \midrule
 CpD      & Compound $\to$ Disease (palliates)                               & symptomatic precedent \\
 CbGaD    & Compound-binds-Gene-associates-Disease                           & target-driven \\
-CuGuD    & Compound-up-Gene-up-Disease                                      & co-upregulation \\
-CdGdD    & Compound-down-Gene-down-Disease                                  & co-downregulation \\
-CuGdD    & Compound-up-Gene-down-Disease                                    & compensatory axis \\
-CdGuD    & Compound-down-Gene-up-Disease                                    & compensatory axis \\
 CrCtD    & Compound-resembles-Compound-treats-Disease                       & analogue rescue \\
 CbGiGaD  & Compound-binds-Gene-interacts-Gene-associates-Disease            & 2-hop mechanistic \\
-CbGpPpG  & Compound-binds-Gene-participates-Pathway-participates-Gene       & pathway proxy \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -304,7 +299,7 @@ The decline at $K{=}10$ is not a statistical artefact: the top-$5$ paths in each
 \subsection{Faithfulness of generated rationales}
 \label{sec:exp:faith}
 
-The judge flags only $52.3\%$ of rationales ($56/107$) as faithful---that is, using only entities that appear in the verbalised paths. The remaining $47.7\%$ introduce plausible but unsupported claims, typically of three kinds: (a) invented mechanistic category labels such as ``anti-inflammatory pathway'' not spelt out in the paths; (b) asserted \emph{direction} of regulation where the graph only records association; (c) reference to a known clinical class (``glucocorticoid'') whose entity is absent from the retrieved subgraph. A representative unfaithful rationale (Trisalicylate-choline $\to$ asthma, judged \textsc{false}) reads: \emph{``Trisalicylate-choline binds to PTGS2, and PTGS2 is associated with asthma. This binding indicates a potential mechanistic link where the drug could inhibit PTGS2 activity to alleviate asthma symptoms.''} The only graph-supported claim is the first sentence; ``inhibit'', ``alleviate symptoms'' and ``mechanistic link'' are the LLM's own synthesis. This gap is the most actionable target for the closed-loop extension (\S\ref{sec:fut}).
+Of the $150$ test pairs, $107$ returned at least one retrieved path; the remaining $43$ returned an empty path set and are excluded from the faithfulness analysis (the judge is invoked only when there is a context to audit). The judge flags only $52.3\%$ of rationales ($56/107$) as faithful---that is, using only entities that appear in the verbalised paths. The remaining $47.7\%$ introduce plausible but unsupported claims, typically of three kinds: (a) invented mechanistic category labels such as ``anti-inflammatory pathway'' not spelt out in the paths; (b) asserted \emph{direction} of regulation where the graph only records association; (c) reference to a known clinical class (``glucocorticoid'') whose entity is absent from the retrieved subgraph. A representative unfaithful rationale (Trisalicylate-choline $\to$ asthma, judged \textsc{false}) reads: \emph{``Trisalicylate-choline binds to PTGS2, and PTGS2 is associated with asthma. This binding indicates a potential mechanistic link where the drug could inhibit PTGS2 activity to alleviate asthma symptoms.''} The only graph-supported claim is the first sentence; ``inhibit'', ``alleviate symptoms'' and ``mechanistic link'' are the LLM's own synthesis. This gap is the most actionable target for the closed-loop extension (\S\ref{sec:fut}).
 
 \subsection{Error analysis}
 \label{sec:exp:errors}
@@ -346,7 +341,9 @@ To illustrate the interpretive payoff of our pipeline, we ran the DDR1-centric c
 
 \textbf{Retrieval as a verifiable context provider.} Our results reinforce a growing consensus~\citep{lewis2020rag,mavromatis2024gnnrag} that retrieval is most useful when its outputs are \emph{checkable}: the judge in \S\ref{sec:method:judge} is only possible because the ``context'' is an enumeration of graph entities, not free-form text. Any future scaling effort on this pipeline should therefore optimise retriever quality and faithfulness jointly; improving one at the cost of the other is a false economy.
 
-\textbf{Small topological signal, large interpretive leverage.} Using the information-theoretic decomposition of \citet{bertschinger2014unique}, \citet{hays2026raggnn} estimate that retrieval contributes only $8.6\%$ of the unique predictive information above topology. Our absolute-accuracy gain of $+15$ points from \gnno to \ours (Table~\ref{tab:main}) at first sight seems to contradict this estimate. The tension dissolves once we note that LLM reasoning is not adding \emph{new} information so much as reorganising the GNN's own embedding distances into an explanatory chain that the binary classifier discards. The information-theoretic and task-utility views are therefore complementary, not competing.
+\textbf{Small topological signal, large interpretive leverage.} Using the information-theoretic decomposition of \citet{bertschinger2014unique}, \citet{hays2026raggnn} estimate that retrieval contributes only a small fraction of the unique predictive information above topology. Our absolute-accuracy gain of $+15$ points from \gnno to \ours (Table~\ref{tab:main}) at first sight seems to contradict this. The tension dissolves once we note that LLM reasoning is not adding \emph{new} information so much as reorganising the GNN's own embedding distances into an explanatory chain that the binary classifier discards. The information-theoretic and task-utility views are therefore complementary, not competing.
+
+\textbf{Hetionet coverage bias.} Hetionet's edge density is skewed toward well-studied compounds and diseases; predictions for rare-disease compounds at the long tail of the distribution inherit this bias and should be interpreted with caution. Any translational use of the pipeline must account for the fact that absence of a retrieved path may reflect a data gap rather than a true absence of a biological connection.
 
 \textbf{Faithfulness is the bottleneck.} A $52\%$ faithfulness rate is unacceptable in any clinical setting, and yet the final predictions remain $87\%$ accurate. This is a warning: the pipeline is \emph{right for the wrong reasons} almost half the time. Bridging this gap is not a matter of larger models; frontier models like grok-4-fast-reasoning already know they should ``only use provided entities'' yet still hallucinate. Architectural interventions---constrained decoding against the entity vocabulary, self-consistency filtering with the judge, or the closed-loop RL reward of our original proposal---are all plausible fixes (\S\ref{sec:fut}).
 
@@ -357,25 +354,17 @@ To illustrate the interpretive payoff of our pipeline, we ran the DDR1-centric c
 The present study has four main limitations, each of which points to a specific extension.
 
 \begin{enumerate}[label=(\roman*)]
-    \item \textbf{Hand-designed meta-paths.} Our nine templates are a biologist's shortlist rather than an exhaustive search of Hetionet's meta-path space. Automatic meta-path mining along the lines of PathCon~\citep{wang2021pathcon} would reduce this bias.
+    \item \textbf{Hand-designed meta-paths.} Our four templates are a biologist's shortlist rather than an exhaustive search of Hetionet's meta-path space. Five additional candidates (the four co-regulation paths CuGuD/CdGdD/CuGdD/CdGuD and the pathway-proxy CbGpPpG) were excluded because Hetionet stores Disease-expression-Gene edges as forward-only, making reverse traversal unavailable, and CbGpPpG terminates at Gene rather than Disease. Automatic meta-path mining along the lines of PathCon~\citep{wang2021pathcon} would reduce this bias.
     \item \textbf{Open-loop retrieval.} Eq.~\eqref{eq:pathscore} never receives a downstream signal. Our original proposal's closed-loop scheme, using the LLM judge as an RL reward for retriever parameters, remains the natural next step---especially given that the \S\ref{sec:exp:faith} faithfulness signal is precisely the reward such a system would use. The static saturation curve of Figure~\ref{fig:ablation} suggests a \emph{score cut-off} retriever may match or exceed a full RL treatment at a fraction of the training cost.
     \item \textbf{No text-enriched node features.} \citet{hays2026raggnn} encode PubMed abstracts with BioBERT~\citep{lee2020biobert} to obtain node features; our embeddings are learnt from scratch. Injecting BioBERT features would couple the LLM and GNN knowledge more tightly and likely improve both \gnno and \ours.
     \item \textbf{Scale.} PrimeKG~\citep{chandak2022primekg}, $2.7\times$ larger than Hetionet, would stress-test the saturation phenomenon and the judge's scalability. We view this as the clearest path to a top-venue submission.
 \end{enumerate}
 
 % ====================================================================
-\section{Broader Impact}
-\label{sec:impact}
-
-Drug repurposing is widely regarded as the cheapest and fastest path to new therapies for neglected and rare diseases; a reliable GraphRAG system that both predicts and \emph{justifies} candidate compounds could meaningfully shorten this path, particularly for conditions where prospective trials are prohibitive. Our pipeline is fully open-source and uses a public benchmark (Hetionet), removing one barrier to entry for small academic groups or low-resource settings. Positive externalities therefore include democratised access to interpretable drug-repurposing tooling and a transparent baseline against which future closed-loop systems can be compared.
-
-We are, however, explicit about three risks. First, our $52.3\%$ faithfulness rate (\S\ref{sec:exp:faith}) means that almost half of the natural-language rationales contain entities or mechanistic claims that the retrieved subgraph does not support; \emph{any} downstream use that confuses a plausible explanation with a verified one is unsafe. Second, Hetionet is a snapshot, not ground truth: biases in the underlying databases (e.g., the over-representation of well-studied proteins) propagate into predictions and can amplify existing research inequities across diseases. Third, LLM-based reasoning is non-deterministic and subject to training-data drift; reported accuracies may not be reproducible as the hosted Grok model is updated. For all of these reasons, the pipeline is intended as a \emph{hypothesis-generation} tool, not a clinical recommender, and any translational use must be accompanied by expert curation and wet-lab validation.
-
-% ====================================================================
 \section{Reproducibility}
 \label{sec:reproducibility}
 
-All experiments use fixed random seeds (GNN split seed $42$; training seed $42$; bootstrap seed $0$). Hetionet is downloaded directly from the official GitHub release at load time (SHA-pinned via a caching wrapper). Hyperparameters are documented in \S\ref{sec:method:gnn} and \S\ref{sec:exp} and duplicated in \texttt{scripts/train\_gnn.py} / \texttt{scripts/train\_kge.py} argparse defaults. The full $N{=}150$ per-case JSONL (including every LLM rationale and judge decision) and the \texttt{ablation\_k.json} output are shipped in the \texttt{runs/} directory of the public repository, so the main-results and error-analysis tables can be regenerated offline without an API key by running \texttt{experiments/error\_analysis.py} and \texttt{experiments/recompute\_kge.py}. Confidence intervals are from $2{,}000$ bootstrap resamples. The only non-deterministic component is the Grok LLM; to mitigate this we set \texttt{temperature}\,$=0$, but we acknowledge that hosted-model updates may shift future reproductions by several percentage points.
+All experiments use fixed random seeds (GNN split seed $42$; training seed $42$; negative-sample seed $42$; bootstrap seed $0$). Hetionet is downloaded directly from the official GitHub release at load time (SHA-pinned via a caching wrapper). Hyperparameters are documented in \S\ref{sec:method:gnn} and \S\ref{sec:exp} and duplicated in \texttt{scripts/train\_gnn.py} / \texttt{scripts/train\_kge.py} argparse defaults. The full $N{=}150$ per-case JSONL (including every LLM rationale and judge decision) and the \texttt{ablation\_k.json} output are shipped in the \texttt{runs/} directory of the public repository, so the main-results and error-analysis tables can be regenerated offline without an API key by running \texttt{experiments/error\_analysis.py} and \texttt{experiments/recompute\_kge.py}. Confidence intervals are from $2{,}000$ bootstrap resamples. The only non-deterministic component is the Grok LLM; to mitigate this we set \texttt{temperature}\,$=0$, but we acknowledge that hosted-model updates may shift future reproductions by several percentage points.
 
 % ====================================================================
 \section{Conclusion}

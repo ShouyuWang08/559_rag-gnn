@@ -27,6 +27,7 @@ def main():
     p.add_argument("--n-neg", type=int, default=20)
     p.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     p.add_argument("--out", type=str, default="runs/ablation_k.json")
+    p.add_argument("--neg-seed", type=int, default=42)
     args = p.parse_args()
 
     data, _ = load_hetionet()
@@ -52,7 +53,7 @@ def main():
 
     pos_pairs = [(int(split.test_pos[0, i]), int(split.test_pos[1, i]))
                  for i in range(split.test_pos.size(1))][: args.n_test]
-    neg_ei = sample_negatives(split.num_compounds, split.num_diseases, args.n_neg, positive_set=all_pos)
+    neg_ei = sample_negatives(split.num_compounds, split.num_diseases, args.n_neg, positive_set=all_pos, seed=args.neg_seed)
     neg_pairs = [(int(neg_ei[0, i]), int(neg_ei[1, i])) for i in range(neg_ei.size(1))]
     cases = [(c, d, 1) for c, d in pos_pairs] + [(c, d, 0) for c, d in neg_pairs]
 

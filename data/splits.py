@@ -45,9 +45,13 @@ def split_ctd(data: HeteroData, val_ratio: float = 0.1, test_ratio: float = 0.1,
 
 
 def sample_negatives(num_compounds: int, num_diseases: int, num_samples: int,
-                     positive_set: set[tuple[int, int]] | None = None) -> torch.Tensor:
-    c = torch.randint(0, num_compounds, (num_samples * 2,))
-    d = torch.randint(0, num_diseases, (num_samples * 2,))
+                     positive_set: set[tuple[int, int]] | None = None,
+                     seed: int | None = 42) -> torch.Tensor:
+    g = torch.Generator()
+    if seed is not None:
+        g.manual_seed(seed)
+    c = torch.randint(0, num_compounds, (num_samples * 2,), generator=g)
+    d = torch.randint(0, num_diseases, (num_samples * 2,), generator=g)
     if positive_set is None:
         return torch.stack([c[:num_samples], d[:num_samples]])
     kept_c, kept_d = [], []
