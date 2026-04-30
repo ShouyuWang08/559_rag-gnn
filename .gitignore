@@ -1,7 +1,6 @@
 # data + model artifacts (reproducible — re-download / re-train)
 cache/
 checkpoints/
-runs/
 
 # secrets
 .env

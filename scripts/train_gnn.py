@@ -89,7 +89,8 @@ def main():
         predictor.train()
         n_pos = split.train_pos.size(1)
         neg_ei = sample_negatives(split.num_compounds, split.num_diseases,
-                                   n_pos * args.neg_ratio, positive_set=all_pos).to(args.device)
+                                   n_pos * args.neg_ratio, positive_set=all_pos,
+                                   seed=None).to(args.device)
 
         z = model(data)
         pos_score = score_edges(z, predictor, split.train_pos)
