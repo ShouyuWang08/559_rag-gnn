@@ -128,9 +128,9 @@ def figure_pipeline() -> None:
 # ============================================================================
 def figure_bars() -> None:
     methods = ["LLM-only", "GNN-only", "KGE\n(calibrated)", "GNN-RAG+LLM\n(ours)"]
-    accs    = np.array([0.553, 0.727, 0.787, 0.873])
-    ci_lo   = np.array([0.080, 0.074, 0.067, 0.060])
-    ci_hi   = np.array([0.080, 0.066, 0.066, 0.047])
+    accs    = np.array([0.573, 0.727, 0.747, 0.873])
+    ci_lo   = np.array([0.080, 0.074, 0.074, 0.053])
+    ci_hi   = np.array([0.080, 0.066, 0.066, 0.054])
     colors  = [C_LLM, C_GNN, C_KGE, C_OURS]
 
     fig, ax = plt.subplots(figsize=(6.8, 3.2))
@@ -174,7 +174,7 @@ def figure_bars() -> None:
 # ============================================================================
 def figure_ablation() -> None:
     Ks   = np.array([0, 1, 3, 5, 10])
-    accs = np.array([0.525, 0.750, 0.800, 0.875, 0.825])
+    accs = np.array([0.500, 0.850, 0.925, 0.925, 0.900])
 
     fig, ax = plt.subplots(figsize=(6.8, 3.3))
 
@@ -185,27 +185,27 @@ def figure_ablation() -> None:
     ax.plot(Ks, accs, "o", color=ACCENT, markersize=7,
             markerfacecolor=ACCENT, markeredgecolor="white", markeredgewidth=1.1, zorder=3)
 
-    # peak star
-    ax.plot(5, 0.875, marker="*", markersize=24,
+    # peak stars at K=3 and K=5 (tied)
+    ax.plot(5, 0.925, marker="*", markersize=24,
             markerfacecolor="#D03030", markeredgecolor="#701515", markeredgewidth=1.0, zorder=5)
 
     # per-point callouts
-    ax.text(0,  0.525 - 0.025, "0.525", ha="center", va="top", fontsize=8.5, color=ACCENT)
-    ax.text(1,  0.750 - 0.025, "0.750", ha="center", va="top", fontsize=8.5, color=ACCENT)
-    ax.text(3,  0.800 - 0.025, "0.800", ha="center", va="top", fontsize=8.5, color=ACCENT)
-    ax.text(5,  0.905, r"$K^\star=5$   0.875", ha="center", va="bottom",
+    ax.text(0,  0.500 - 0.025, "0.500", ha="center", va="top", fontsize=8.5, color=ACCENT)
+    ax.text(1,  0.850 - 0.025, "0.850", ha="center", va="top", fontsize=8.5, color=ACCENT)
+    ax.text(3,  0.925 + 0.020, "0.925", ha="center", va="bottom", fontsize=8.5, color=ACCENT)
+    ax.text(5,  0.955, r"$K^\star=5$   0.925", ha="center", va="bottom",
             fontsize=9.5, fontweight="bold", color="#B02020")
-    ax.text(10, 0.825 - 0.025, "0.825", ha="center", va="top", fontsize=8.5, color=ACCENT)
+    ax.text(10, 0.900 - 0.025, "0.900", ha="center", va="top", fontsize=8.5, color=ACCENT)
 
     # drop annotation (curved arrow + label)
     drop = FancyArrowPatch(
-        (5.7, 0.875), (9.5, 0.835),
+        (5.7, 0.925), (9.5, 0.907),
         arrowstyle="-|>", mutation_scale=12,
         connectionstyle="arc3,rad=-0.28",
         color="#B02020", linewidth=1.2,
     )
     ax.add_patch(drop)
-    ax.text(7.6, 0.925, r"$-5$ pts drop",
+    ax.text(7.6, 0.965, r"$-2.5$ pts drop",
             ha="center", va="bottom", fontsize=9, color="#B02020", style="italic")
 
     ax.set_xlabel(r"Number of retrieved paths $K$", fontsize=11)
@@ -213,7 +213,7 @@ def figure_ablation() -> None:
     ax.set_xticks([0, 1, 3, 5, 10])
     ax.set_yticks([0.5, 0.6, 0.7, 0.8, 0.9])
     ax.set_xlim(-0.6, 10.6)
-    ax.set_ylim(0.45, 0.96)
+    ax.set_ylim(0.45, 1.00)
     ax.grid(True, linestyle="--", alpha=0.35)
     ax.set_axisbelow(True)
     ax.spines["top"].set_visible(False)
