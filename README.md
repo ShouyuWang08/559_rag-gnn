@@ -121,39 +121,39 @@ rag-gnn-hetionet/
 
 | Model | Test AUROC | Test AUPRC |
 |---|---|---|
-| GNN (SAGEConv + to_hetero, 100 epochs) | **0.908** | 0.578 |
-| DistMult (30 epochs) | 0.867 | 0.430 |
+| GNN (SAGEConv + to_hetero, 100 epochs) | **0.8919** | 0.5485 |
+| DistMult (30 epochs) | 0.8645 | 0.4495 |
 
 ### Main Results Table (experiments/main_results.py + recompute_kge.py)
 
 | Method | Accuracy | 95% CI |
 |---|---|---|
-| **GNN-RAG + LLM (ours)** | **0.8733** | [0.81, 0.92] |
-| KGE (DistMult, calibrated) | 0.7867 | [0.72, 0.85] |
+| **GNN-RAG + LLM (ours)** | **0.8733** | [0.82, 0.93] |
+| KGE (DistMult, calibrated) | 0.7467 | [0.67, 0.81] |
 | GNN-only | 0.7267 | [0.65, 0.79] |
-| LLM-only (no retrieval) | 0.5533 | [0.47, 0.63] |
+| LLM-only (no retrieval) | 0.5733 | [0.49, 0.65] |
 
 ### McNemar Paired Significance
 
-- GNN-RAG+LLM **vs** LLM-only: p = 4.7 × 10⁻⁸ \*\*\*
-- GNN-RAG+LLM **vs** GNN-only: p = 0.003 \*\*
-- GNN-RAG+LLM **vs** KGE-calibrated: p = 0.04 \*
+- GNN-RAG+LLM **vs** LLM-only: p = 7.64 × 10⁻⁸ \*\*\*
+- GNN-RAG+LLM **vs** GNN-only: p = 0.00298 \*\*
+- GNN-RAG+LLM **vs** KGE-calibrated: p = 0.00605 \*\*
 
 ### Top-K Ablation (experiments/ablation_k.py, N=40)
 
 | K | Accuracy |
 |---|---|
-| 0 (LLM-only) | 0.525 |
-| 1 | 0.750 |
-| 3 | 0.800 |
-| **5** | **0.875** |
-| 10 | 0.825 |
+| 0 (LLM-only) | 0.500 |
+| 1 | 0.850 |
+| 3 | **0.925** |
+| **5** | **0.925** |
+| 10 | 0.900 |
 
-**K=5 is the saturation point.** K=10 actually decreases — too many paths dilute LLM attention.
+**K=3–5 is the saturation point.** K=10 decreases slightly — too many paths dilute LLM attention.
 
 ### LLM Faithfulness
 
-Rationale faithfulness rate: **52.3%** (n=107) — roughly half of rationales introduce entities outside the retrieved paths. Can be discussed in Limitations.
+Rationale faithfulness rate: **57.0%** (57/100 with paths; 50/150 pairs had no retrieved paths) — roughly 43% of rationales introduce entities outside the retrieved paths. Can be discussed in Limitations.
 
 ### Error Analysis Buckets (N=150)
 
@@ -163,10 +163,10 @@ Rationale faithfulness rate: **52.3%** (n=107) — roughly half of rationales in
 | GNN wrong but RAG+LLM correct (RAG rescue) | 36 |
 | GNN correct but RAG+LLM wrong | 14 |
 | Both wrong | 5 |
-| retrieval_helped | **61** |
-| retrieval_hurt | 13 |
+| retrieval_helped | **56** |
+| retrieval_hurt | 11 |
 
-Net retrieval benefit: 61 : 13 ≈ 4.7×.
+Net retrieval benefit: 56 : 11 ≈ 5.1×.
 
 ---
 
