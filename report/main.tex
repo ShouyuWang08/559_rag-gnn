@@ -96,7 +96,7 @@ Three concurrent lines of work are closest to ours. \citet{mavromatis2024gnnrag}
 \begin{enumerate}[label=(\roman*)]
     \item An open-source, end-to-end GraphRAG pipeline for Hetionet combining heterogeneous GraphSAGE, meta-path subgraph retrieval, path verbalisation and Grok-based LLM reasoning (\S\ref{sec:method}).
     \item A paired $N{=}150$ comparison of four methods---\llmo, \gnno, calibrated \kge, and \ours---with bootstrap confidence intervals and McNemar significance tests (\S\ref{sec:exp:main}).
-    \item Empirical identification of a top-$K$ saturation law: retrieval quality rises sharply from $K{=}0$ to $K{=}5$ and then \emph{declines}, a finding we trace to attention-dilution effects in long-context LLM prompts (\S\ref{sec:exp:ablation}).
+    \item Empirical identification of a top-$K$ saturation law: retrieval quality rises sharply from $K{=}0$ to $K{=}3$--$5$ and then \emph{declines}, a finding we trace to attention-dilution effects in long-context LLM prompts (\S\ref{sec:exp:ablation}).
     \item A dual-call LLM-as-judge faithfulness analysis that uncovers a $\sim$43\% hallucination rate on the \emph{rationale} even when final predictions are correct, isolating a concrete target for future closed-loop work (\S\ref{sec:exp:faith},~\S\ref{sec:disc}).
 \end{enumerate}
 
@@ -265,7 +265,7 @@ Method & Accuracy & $95\%$ CI & vs \ours \\
 \end{minipage}
 \end{figure}
 
-Three observations follow from Table~\ref{tab:main}. \textbf{First}, DistMult with proper threshold calibration ($0.747$) already outperforms our two-layer heterogeneous GraphSAGE ($0.727$, $p{=}0.75$ ns), a reminder that architectural sophistication alone is not a guarantee of classification accuracy on sparse target relations. \textbf{Second}, the LLM on its own scores barely above chance ($0.573$)---despite grok-4-fast-reasoning being a frontier model---confirming that commonsense drug knowledge is insufficient for the long tail of compounds in Hetionet. \textbf{Third}, combining GNN retrieval and LLM reasoning produces a $+0.30$ absolute accuracy lift over \llmo and a $+0.15$ lift over \gnno, both highly significant. The synergy is thus not an artefact of one component being weak; it reflects genuine complementarity.
+Three observations follow from Table~\ref{tab:main}. \textbf{First}, DistMult with proper threshold calibration ($0.747$) \emph{scores higher than} our two-layer heterogeneous GraphSAGE ($0.727$), though the gap is not statistically significant ($p{=}0.75$ ns), a reminder that architectural sophistication alone is not a guarantee of classification accuracy on sparse target relations. \textbf{Second}, the LLM on its own scores barely above chance ($0.573$)---despite grok-4-fast-reasoning being a frontier model---confirming that commonsense drug knowledge is insufficient for the long tail of compounds in Hetionet. \textbf{Third}, combining GNN retrieval and LLM reasoning produces a $+0.30$ absolute accuracy lift over \llmo and a $+0.15$ lift over \gnno, both highly significant. The synergy is thus not an artefact of one component being weak; it reflects genuine complementarity.
 
 \subsection{Top-$K$ retrieval ablation}
 \label{sec:exp:ablation}

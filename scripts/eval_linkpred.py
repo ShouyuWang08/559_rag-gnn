@@ -75,8 +75,8 @@ def main():
 
     y_true = torch.cat([torch.ones(n_pos), torch.zeros(n_pos * args.n_neg_per_pos)])
     y_pred = torch.cat([pos_scores, neg_scores.flatten()])
-    auroc = roc_auc_score(y_true.numpy(), y_pred.numpy())
-    auprc = average_precision_score(y_true.numpy(), y_pred.numpy())
+    auroc = roc_auc_score(y_true.numpy(), y_pred.detach().numpy())
+    auprc = average_precision_score(y_true.numpy(), y_pred.detach().numpy())
 
     print(f"AUROC  {auroc:.4f}")
     print(f"AUPRC  {auprc:.4f}")
