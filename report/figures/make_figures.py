@@ -185,16 +185,16 @@ def figure_ablation() -> None:
     ax.plot(Ks, accs, "o", color=ACCENT, markersize=7,
             markerfacecolor=ACCENT, markeredgecolor="white", markeredgewidth=1.1, zorder=3)
 
-    # peak stars at K=3 and K=5 (tied)
-    ax.plot(5, 0.925, marker="*", markersize=24,
-            markerfacecolor="#D03030", markeredgecolor="#701515", markeredgewidth=1.0, zorder=5)
+    # plateau stars at K=3 and K=5 (tied peak)
+    for kp in (3, 5):
+        ax.plot(kp, 0.925, marker="*", markersize=20,
+                markerfacecolor="#D03030", markeredgecolor="#701515", markeredgewidth=1.0, zorder=5)
 
     # per-point callouts
     ax.text(0,  0.500 - 0.025, "0.500", ha="center", va="top", fontsize=8.5, color=ACCENT)
     ax.text(1,  0.850 - 0.025, "0.850", ha="center", va="top", fontsize=8.5, color=ACCENT)
-    ax.text(3,  0.925 + 0.020, "0.925", ha="center", va="bottom", fontsize=8.5, color=ACCENT)
-    ax.text(5,  0.955, r"$K^\star=5$   0.925", ha="center", va="bottom",
-            fontsize=9.5, fontweight="bold", color="#B02020")
+    ax.text(4,  0.960, r"peak plateau $K{=}3$--$5$: 0.925",
+            ha="center", va="bottom", fontsize=9.5, fontweight="bold", color="#B02020")
     ax.text(10, 0.900 - 0.025, "0.900", ha="center", va="top", fontsize=8.5, color=ACCENT)
 
     # drop annotation (curved arrow + label)
